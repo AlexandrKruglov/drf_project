@@ -1,18 +1,20 @@
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from materials.models import Course, Lesson, Payments
+from materials.models import Course, Lesson, Payments, Subscription
+from materials.validators import LinkValidator
 
 
 class LessonSerializer(ModelSerializer):
     class Meta:
         model = Lesson
         fields = '__all__'
-
+        validators = [LinkValidator(field='link')]
 
 class CourseSerializer(ModelSerializer):
     quantity_lessons = serializers.SerializerMethodField()
     lesson = LessonSerializer(read_only=True, source='lesson_set', many=True)
+    link = serializers.CharField(validators = [LinkValidator(field='link')])
 
     class Meta:
         model = Course
@@ -25,4 +27,9 @@ class CourseSerializer(ModelSerializer):
 class PaymentsSerializer(ModelSerializer):
     class Meta:
         model = Payments
+        fields = '__all__'
+
+class SubscriptionSerializer(ModelSerializer):
+    class Meta:
+        model = Subscription
         fields = '__all__'

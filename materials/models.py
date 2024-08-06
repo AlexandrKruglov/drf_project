@@ -1,6 +1,8 @@
 from django.db import models
 
-from users.models import NULLABLE, User
+from users.models import User
+
+NULLABLE = {"blank": True, "null": True}
 
 
 class Course(models.Model):
@@ -60,3 +62,15 @@ class Payments(models.Model):
     class Meta:
         verbose_name = 'урок'
         verbose_name_plural = 'уроки'
+
+
+class Subscription(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, **NULLABLE, verbose_name='пользователь')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='курс')
+
+    def __str__(self):
+        return f'{self.user} - {self.course} подписка {self.activ}'
+
+    class Meta:
+        verbose_name = 'подписка'
+        verbose_name_plural = 'подписки'

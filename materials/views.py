@@ -1,16 +1,20 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView, \
+    get_object_or_404
 from rest_framework.filters import OrderingFilter
-from materials.models import Course, Lesson, Payments
-from materials.serializers import CourseSerializer, LessonSerializer, PaymentsSerializer
+from materials.models import Course, Lesson, Payments, Subscription
+from materials.paginators import CustomPagination
+from materials.serializers import CourseSerializer, LessonSerializer, PaymentsSerializer, SubscriptionSerializer
 from users.permissions import IsModerator, IsOwner
 
 
 class CourseViewSet(ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+    pagination_class = CustomPagination
 
     def perform_create(self, serializer):
         course = serializer.save()
@@ -41,6 +45,7 @@ class LessonCreateAPIView(CreateAPIView):
 class LessonListAPIView(ListAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+    pagination_class = CustomPagination
 
 
 class LessonRetrieveAPIView(RetrieveAPIView):
@@ -79,4 +84,26 @@ class PaymentsCreateAPIView(CreateAPIView):
     queryset = Payments.objects.all()
     serializer_class = PaymentsSerializer
 
+
+class SubscriptionCreateAPIView(CreateAPIView):
+    queryset = Subscription.objects.all()
+    serializer_class = SubscriptionSerializer
+
+    def post(self, request, *args, **kwargs):
+        user = self.request.user
+        course_id = self.request.data.get("course")
+        course_item = get_object_or_404(Course, pk=course_id)
+
+        subscription, created = Subscription.objects.get_or_create(user=user, course=course_item)
+        if not created:
+            subscription.delete()
+            message = 'подписка удалена'
+        else:
+            message = 'подписка добавлена'
+
+        return Response({"message": message})
+
+class SubscriptionDestroyAPIView(DestroyAPIView):
+    queryset = Subscription.objects.all()
+    serializer_class = SubscriptionSerializer
 
