@@ -13,8 +13,7 @@ class LessonSerializer(ModelSerializer):
 
 class CourseSerializer(ModelSerializer):
     quantity_lessons = serializers.SerializerMethodField()
-    lesson = LessonSerializer(read_only=True, source='lesson_set', many=True)
-    link = serializers.CharField(validators = [LinkValidator(field='link')])
+    lesson = LessonSerializer(read_only=True, source='lessons', many=True)
 
     class Meta:
         model = Course
