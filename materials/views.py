@@ -7,7 +7,8 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView,
 from rest_framework.filters import OrderingFilter
 from materials.models import Course, Lesson, Payments, Subscription
 from materials.paginators import CustomPagination
-from materials.serializers import CourseSerializer, LessonSerializer, PaymentsSerializer, SubscriptionSerializer
+from materials.serializers import CourseSerializer, LessonSerializer, PaymentsSerializer, SubscriptionSerializer, \
+    CourseDitailSerializer
 from users.permissions import IsModerator, IsOwner
 
 
@@ -15,6 +16,12 @@ class CourseViewSet(ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     pagination_class = CustomPagination
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return CourseDitailSerializer
+        return CourseSerializer
+
 
     def perform_create(self, serializer):
         course = serializer.save()
