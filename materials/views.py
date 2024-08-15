@@ -9,6 +9,7 @@ from materials.models import Course, Lesson, Payments, Subscription
 from materials.paginators import CustomPagination
 from materials.serializers import CourseSerializer, LessonSerializer, PaymentsSerializer, SubscriptionSerializer, \
     CourseDitailSerializer
+from materials.services import create_price, create_session
 from users.permissions import IsModerator, IsOwner
 
 
@@ -90,6 +91,15 @@ class PaymentsListAPIView(ListAPIView):
 class PaymentsCreateAPIView(CreateAPIView):
     queryset = Payments.objects.all()
     serializer_class = PaymentsSerializer
+
+    def perform_create(self, serializer):
+        payment = serializer.save(user=self.request.user)
+        price = create_price(payment.summ)
+        session_id, link = create_session(price)
+        payment.session_id = session_id
+        payment.link = link
+        payment.save()
+
 
 
 class SubscriptionCreateAPIView(CreateAPIView):
