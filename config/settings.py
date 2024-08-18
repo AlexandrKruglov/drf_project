@@ -33,7 +33,9 @@ INSTALLED_APPS = [
     "materials",
     'django_filters',
     'rest_framework_simplejwt',
-    'drf_yasg'
+    'drf_yasg',
+    'django_celery_beat'
+
 ]
 
 REST_FRAMEWORK = {
@@ -141,3 +143,39 @@ AUTH_USER_MODEL = "users.User"
 
 
 STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
+
+
+# URL-адрес брокера сообщений
+CELERY_BROKER_URL = 'redis://localhost:6379'
+
+# URL-адрес брокера результатов, также Redis
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+
+# Часовой пояс для работы Celery
+CELERY_TIMEZONE = TIME_ZONE
+
+# Флаг отслеживания выполнения задач
+CELERY_TASK_TRACK_STARTED = True
+
+# Максимальное время на выполнение задачи
+CELERY_TASK_TIME_LIMIT = 30 * 60
+
+
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS') == 'True'
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL') == 'True'
+
+SERVER_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
+
+CELERY_BEAT_SCHEDULE = {
+    "deactivate_user": {
+        "task": "materials.tasks.deactivate_user",  # Путь к задаче
+        "schedule": timedelta(minutes=1),  # Расписание выполнения задачи (например, каждый день)
+    }
+}

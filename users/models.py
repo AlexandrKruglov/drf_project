@@ -12,6 +12,7 @@ class User(AbstractUser):
         upload_to="users/avatars/", verbose_name="аватар", **NULLABLE
     )
     city = models.CharField(max_length=35, verbose_name="город", **NULLABLE)
+    last_login = models.DateTimeField(auto_now_add=True, **NULLABLE)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []

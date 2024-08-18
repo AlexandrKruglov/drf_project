@@ -5,12 +5,14 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView, \
     get_object_or_404
 from rest_framework.filters import OrderingFilter
+
 from materials.models import Course, Lesson, Payments, Subscription
 from materials.paginators import CustomPagination
 from materials.serializers import CourseSerializer, LessonSerializer, PaymentsSerializer, SubscriptionSerializer, \
     CourseDitailSerializer
 from materials.services import create_price, create_session
 from users.permissions import IsModerator, IsOwner
+from materials.tasks import send_information_about_update_course
 
 
 class CourseViewSet(ModelViewSet):
@@ -23,11 +25,16 @@ class CourseViewSet(ModelViewSet):
             return CourseDitailSerializer
         return CourseSerializer
 
-
     def perform_create(self, serializer):
         course = serializer.save()
         course.owner = self.request.user
         course.save()
+
+    def perform_update(self, serializer):
+
+        course_temp = serializer.save()
+        send_information_about_update_course.delay(course_temp.id)
+        course_temp.save()
 
     def get_permissions(self):
         if self.action == 'create':
@@ -87,7 +94,6 @@ class PaymentsListAPIView(ListAPIView):
         payments.save()
 
 
-
 class PaymentsCreateAPIView(CreateAPIView):
     queryset = Payments.objects.all()
     serializer_class = PaymentsSerializer
@@ -99,7 +105,6 @@ class PaymentsCreateAPIView(CreateAPIView):
         payment.session_id = session_id
         payment.link = link
         payment.save()
-
 
 
 class SubscriptionCreateAPIView(CreateAPIView):
@@ -120,7 +125,7 @@ class SubscriptionCreateAPIView(CreateAPIView):
 
         return Response({"message": message})
 
+
 class SubscriptionDestroyAPIView(DestroyAPIView):
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
-
