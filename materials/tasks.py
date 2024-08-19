@@ -23,12 +23,14 @@ def send_information_about_update_course(course):
         )
 
 
-@shared_task
+@shared_task(name='materials.tasks.deactivate_user')
 def deactivate_user():
-    print('1!!!!!')
-    users = User.objects.all()
-    for user in users:
-        if user.last_login.date() < (timezone.now() - timedelta(days=30)):
-            user.is_active = False
-            print(f'{user} отключен')
-            user.save()
+    users = User.objects.filter(is_active=True, is_superuser=False,  last_login__isnull=False)
+    print(users)
+    if users.exists():
+        for user in users:
+            print(user.last_login)
+            if user.last_login < (timezone.now() - timedelta(days=30)):
+                user.is_active = False
+                print(f'{user} отключен')
+                user.save()

@@ -141,9 +141,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 AUTH_USER_MODEL = "users.User"
 
-
 STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
-
 
 # URL-адрес брокера сообщений
 CELERY_BROKER_URL = 'redis://localhost:6379'
@@ -160,7 +158,6 @@ CELERY_TASK_TRACK_STARTED = True
 # Максимальное время на выполнение задачи
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
-
 EMAIL_HOST = os.getenv('EMAIL_HOST')
 EMAIL_PORT = os.getenv('EMAIL_PORT')
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
@@ -170,8 +167,6 @@ EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL') == 'True'
 
 SERVER_EMAIL = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
-
 
 CELERY_BEAT_SCHEDULE = {
     "deactivate_user": {
